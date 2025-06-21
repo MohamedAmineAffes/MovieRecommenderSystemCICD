@@ -15,12 +15,17 @@ pipeline {
             }
         }
 
-
         stage('Test') {
             steps {
                 echo 'Running tests...'
+                // Run pytest in the virtual environment
+                sh '''
+                    source .venv/bin/activate  # Activate the virtual environment
+                    pytest script_stage.py -v  # Run tests with verbose output
+                '''
             }
         }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying to AWS...'
