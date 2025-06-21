@@ -8,9 +8,15 @@ pipeline {
         }
         stage('Build') {
             steps {
-                echo 'Building the project...'
+                script {
+                    echo 'Building Docker image using Dockerfile...'
+                    dockerImage = docker.build("movie-recommender:latest")
+                }
             }
         }
+
+
+
         stage('Test') {
             steps {
                 echo 'Running tests...'
