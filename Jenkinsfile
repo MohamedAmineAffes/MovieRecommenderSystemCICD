@@ -8,6 +8,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/MohamedAmineAffes/MovieRecommenderSystemCICD.git'
+                sh 'ls -la ${WORKSPACE}'
             }
         }
 
@@ -38,7 +39,7 @@ pipeline {
                         if [ -d "${WORKSPACE}" ]; then
                             scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/
                         else
-                            echo "Workspace directory not found!"
+                            echo "Workspace directory not found! Check Checkout stage."
                             exit 1
                         fi
                         # Set up virtual environment and install dependencies
