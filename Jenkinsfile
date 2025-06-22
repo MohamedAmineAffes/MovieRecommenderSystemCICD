@@ -16,20 +16,20 @@ pipeline {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     sh '''
                         # Create directory and install python3-venv
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << 'EOF'
-                            mkdir -p ~/movie_recommender
-                            sudo apt update
-                            sudo apt install -y python3.12-venv
+                        ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" << 'EOF'
+                        mkdir -p ~/movie_recommender
+                        sudo apt update
+                        sudo apt install -y python3.12-venv
                         EOF
                         # Transfer files
-                        scp -r ${WORKSPACE}/* ubuntu@${EC2_HOST}:~/movie_recommender/
+                        scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/
                         # Set up virtual environment and install dependencies
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << 'EOF'
-                            cd ~/movie_recommender
-                            python3 -m venv .venv
-                            . .venv/bin/activate
-                            pip install --upgrade pip
-                            pip install -r requirements.txt
+                        ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" << 'EOF'
+                        cd ~/movie_recommender
+                        python3 -m venv .venv
+                        . .venv/bin/activate
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
                         EOF
                     '''
                 }
@@ -39,7 +39,7 @@ pipeline {
         stage('Test SSH with Encrypted Key') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} "echo Successfully connected with encrypted key"'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" "echo Successfully connected with encrypted key"'
                 }
             }
         }
@@ -57,10 +57,10 @@ pipeline {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << 'EOF'
-                            cd ~/movie_recommender
-                            . .venv/bin/activate
-                            pytest script_stage.py -v
+                        ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" << 'EOF'
+                        cd ~/movie_recommender
+                        . .venv/bin/activate
+                        pytest script_stage.py -v
                         EOF
                     '''
                 }
@@ -80,16 +80,16 @@ pipeline {
                         # Save the Docker image as a tar file locally
                         docker save -o movie-recommender.tar movie-recommender:latest
                         # Copy the tar file to EC2
-                        scp movie-recommender.tar ubuntu@${EC2_HOST}:~/movie_recommender/
+                        scp movie-recommender.tar ubuntu@"${EC2_HOST}":~/movie_recommender/
                         # Load and run the image on EC2
-                        ssh ubuntu@${EC2_HOST} << 'EOF'
-                            cd ~/movie_recommender
-                            docker load -i movie-recommender.tar
-                            # Stop and remove any existing container with the same name
-                            docker rm -f movie-recommender-container || true
-                            # Run the container (adjust port and command as per your Dockerfile)
-                            docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest
-                            rm movie-recommender.tar  # Clean up tar file
+                        ssh ubuntu@"${EC2_HOST}" << 'EOF'
+                        cd ~/movie_recommender
+                        docker load -i movie-recommender.tar
+                        # Stop and remove any existing container with the same name
+                        docker rm -f movie-recommender-container || true
+                        # Run the container (adjust port and command as per your Dockerfile)
+                        docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest
+                        rm movie-recommender.tar  # Clean up tar file
                         EOF
                         # Clean up local tar file
                         rm movie-recommender.tar
