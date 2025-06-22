@@ -3,8 +3,12 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Copy code and data
-COPY . .
+# Copy only necessary files
+COPY requirements.txt .
+COPY cleaned_file.py .
+COPY script_stage.py .
+COPY recommender.py .
+COPY *.csv .
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
