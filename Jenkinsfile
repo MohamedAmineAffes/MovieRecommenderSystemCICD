@@ -25,17 +25,10 @@ pipeline {
             }
         }
 
-        stage('Setup on EC2') {
-            steps {
-                sshagent (credentials: ['ec2-ssh-key']) {
-                    // Step 1: Create directory
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" "mkdir -p ~/movie_recommender"'
 
-                    // Step 2: Transfer files
-                    sh 'if [ -d "${WORKSPACE}" ]; then scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/; else echo "Workspace not found!"; exit 1; fi'
-                }
-            }
-        }
+
+
+
 
         stage('Build') {
             steps {
