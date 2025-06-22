@@ -34,8 +34,13 @@ pipeline {
                         sudo apt update
                         sudo apt install -y python3.12-venv -qq
                         EOF
-                        # Transfer files
-                        scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/
+                        # Transfer files (check workspace content)
+                        if [ -d "${WORKSPACE}" ]; then
+                            scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/
+                        else
+                            echo "Workspace directory not found!"
+                            exit 1
+                        fi
                         # Set up virtual environment and install dependencies
                         ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF
                         cd ~/movie_recommender
