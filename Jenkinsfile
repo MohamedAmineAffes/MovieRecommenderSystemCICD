@@ -18,6 +18,15 @@ pipeline {
             }
         }
 
+        stage('Test SSH with Encrypted Key') {
+            steps {
+                sshagent (credentials: ['ec2-ssh-key']) {
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@13.60.32.96 "echo Successfully connected with encrypted key"'
+                }
+            }
+        }
+
+
         stage('Build') {
             steps {
                 script {
