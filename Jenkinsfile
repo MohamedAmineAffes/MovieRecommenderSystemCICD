@@ -28,34 +28,17 @@ pipeline {
         stage('Setup on EC2') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    sh '''
-                        # Create directory and install python3-venv
-                        ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF
-                        mkdir -p ~/movie_recommender
-                        sudo apt update
-                        sudo apt install -y python3.12-venv -qq
-                        EOF
-                        # Transfer files (check workspace content)
-                        if [ -d "${WORKSPACE}" ]; then
-                            scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/
-                        else
-                            echo "Workspace directory not found! Check Checkout stage."
-                            exit 1
-                        fi
-                        # Set up virtual environment and install dependencies
-                        ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF
-                        cd ~/movie_recommender
-                        python3 -m venv .venv
-                        . .venv/bin/activate
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-                        EOF
-                    '''
+                    // Step 1: Create directory and install python3-venv
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF\nmkdir -p ~/movie_recommender\nsudo apt update\nsudo apt install -y python3.12-venv -qq\nEOF'
+
+                    // Step 2: Transfer files from workspace to EC2
+                    sh 'if [ -d "${WORKSPACE}" ]; then scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/; else echo "Workspace directory not found! Check Checkout stage."; exit 1; fi'
+
+                    // Step 3: Set up virtual environment and install dependencies
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF\ncd ~/movie_recommender\npython3 -m venv .venv\n. .venv/bin/activate\npip install --upgrade pip\npip install -r requirements.txt\nEOF'
                 }
             }
         }
-
-
 
         stage('Build') {
             steps {
