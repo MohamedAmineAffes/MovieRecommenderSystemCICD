@@ -32,7 +32,7 @@ This project is a Movie Recommender System implemented with a CI/CD pipeline usi
 ## CI/CD Pipeline
 - **Jenkinsfile**: Defines stages for Checkout, Build, Test, and Deploy.
 - **Trigger**: Automatically runs on push to the `main` branch via GitHub webhook.
-- **Deployment**: Deploys to AWS using S3 and CodeDeploy.
+- **Deployment**: Deploys to AWS using EC2 instance and CodeDeploy.
 
 ## Usage
 - Access the application at `http://localhost:5000` (or your AWS endpoint after deployment).
