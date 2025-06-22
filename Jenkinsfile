@@ -11,6 +11,19 @@ pipeline {
             }
         }
 
+        stage('Test SSH with Encrypted Key') {
+            steps {
+                sshagent (credentials: ['ec2-ssh-key']) {
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" "echo Successfully connected with encrypted key"'
+                }
+            }
+            post {
+                failure {
+                    error 'SSH connection to EC2 failed! Check credentials and network.'
+                }
+            }
+        }
+
         stage('Setup on EC2') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
@@ -36,13 +49,7 @@ pipeline {
             }
         }
 
-        stage('Test SSH with Encrypted Key') {
-            steps {
-                sshagent (credentials: ['ec2-ssh-key']) {
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" "echo Successfully connected with encrypted key"'
-                }
-            }
-        }
+
 
         stage('Build') {
             steps {
