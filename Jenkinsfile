@@ -46,15 +46,15 @@ pipeline {
                         # Save the Docker image as a tar file locally
                         docker save -o movie-recommender.tar movie-recommender:latest
                         # Copy the tar file to EC2
-                        scp movie-recommender.tar ubuntu@"${EC2_HOST}":~/movie_recommender/
+                        scp movie-recommender.tar ubuntu@${EC2_HOST}:~/movie_recommender/
                         # Load and run the image on EC2
-                        ssh ubuntu@"${EC2_HOST}" <<EOF
-                        cd ~/movie_recommender
-                        docker load -i movie-recommender.tar
-                        docker rm -f movie-recommender-container || true
-                        docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest
-                        rm movie-recommender.tar
-                        EOF
+                        ssh ubuntu@${EC2_HOST} '
+                            cd ~/movie_recommender &&
+                            docker load -i movie-recommender.tar &&
+                            docker rm -f movie-recommender-container || true &&
+                            docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest &&
+                            rm movie-recommender.tar
+                        '
                         # Clean up local tar file
                         rm movie-recommender.tar
                     '''
