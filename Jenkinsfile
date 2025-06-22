@@ -1,46 +1,46 @@
 pipeline {
     agent any
+
     environment {
-        EC2_HOST = '13.60.32.96'  // Your EC2 public IP
-        EC2_CRED = credentials('ec2-ssh-key')  // Your Jenkins SSH credential
+        EC2_HOST = '13.60.32.96'                 // Your EC2 public IP
+        EC2_CRED = credentials('ec2-ssh-key')    // Your Jenkins SSH credential
     }
+
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/MohamedAmineAffes/MovieRecommenderSystemCICD.git'
-                sh 'ls -la ${WORKSPACE}'  // Debug: Verify workspace contents
+                sh 'ls -la'  // Debug: List files to confirm workspace contents
             }
         }
 
-        stage('Test SSH with Encrypted Key') {
+        stage('Test SSH Connection') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" "echo Successfully connected"'
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} "echo Successfully connected to EC2"
+                    """
                 }
             }
             post {
                 failure {
-                    error 'SSH to EC2 failed! Check credentials and network.'
+                    error 'SSH to EC2 failed! Check credentials, IP, and security group settings.'
                 }
             }
         }
 
-
-        stage('Setup on EC2') {
+        stage('Prepare EC2') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    // Step 1: Create directory
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" "mkdir -p ~/movie_recommender"'
-
-                    // Step 2: Transfer files
-                    sh 'if [ -d "${WORKSPACE}" ]; then scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/; else echo "Workspace not found!"; exit 1; fi'
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} "mkdir -p ~/movie_recommender"
+                    """
                 }
             }
         }
 
-
-
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     echo 'Building Docker image...'
@@ -52,12 +52,9 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    sh '''
-                        # Save the Docker image as a tar file locally
+                    sh """
                         docker save -o movie-recommender.tar movie-recommender:latest
-                        # Copy the tar file to EC2
                         scp movie-recommender.tar ubuntu@${EC2_HOST}:~/movie_recommender/
-                        # Load and run the image on EC2
                         ssh ubuntu@${EC2_HOST} '
                             cd ~/movie_recommender &&
                             docker load -i movie-recommender.tar &&
@@ -65,9 +62,8 @@ pipeline {
                             docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest &&
                             rm movie-recommender.tar
                         '
-                        # Clean up local tar file
-                        #rm movie-recommender.tar
-                    '''
+                        rm movie-recommender.tar
+                    """
                 }
             }
             post {
@@ -80,15 +76,12 @@ pipeline {
             }
         }
 
-        stage('Test on EC2') {
+        stage('Run Tests Inside Container') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    sh '''
-                        # Execute test inside the running container
-                        ssh ubuntu@"${EC2_HOST}" <<EOF
-                        docker exec movie-recommender-container bash -c ". /app/.venv/bin/activate && pytest /app/script_stage.py -v"
-                        EOF
-                    '''
+                    sh """
+                        ssh ubuntu@${EC2_HOST} "docker exec movie-recommender-container pytest /app/script_stage.py -v"
+                    """
                 }
             }
             post {
