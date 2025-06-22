@@ -15,14 +15,22 @@ pipeline {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     sh '''
+                        # Create directory and install python3-venv
                         ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << 'EOF'
-                            cd ~/movie_recommender || mkdir -p ~/movie_recommender
+                            mkdir -p ~/movie_recommender
+                            sudo apt update
+                            sudo apt install -y python3.12-venv
+                        EOF
+                        # Transfer files
+                        scp -r ${WORKSPACE}/* ubuntu@${EC2_HOST}:~/movie_recommender/
+                        # Set up virtual environment and install dependencies
+                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << 'EOF'
+                            cd ~/movie_recommender
                             python3 -m venv .venv
                             . .venv/bin/activate
                             pip install --upgrade pip
                             pip install -r requirements.txt
                         EOF
-                        scp -r ${WORKSPACE}/* ubuntu@${EC2_HOST}:~/movie_recommender/
                     '''
                 }
             }
