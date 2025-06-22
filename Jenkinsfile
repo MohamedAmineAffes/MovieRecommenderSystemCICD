@@ -29,7 +29,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     // Step 1: Create directory and install python3-venv
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF\nmkdir -p ~/movie_recommender\nsudo apt update\nsudo apt install -y python3.12-venv -qq\nEOF'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@"${EC2_HOST}" <<EOF\nmkdir -p ~/movie_recommender\nsudo apt update\nsudo apt install -y python3.10-venv -qq\nEOF'
 
                     // Step 2: Transfer files from workspace to EC2
                     sh 'if [ -d "${WORKSPACE}" ]; then scp -r ${WORKSPACE}/* ubuntu@"${EC2_HOST}":~/movie_recommender/; else echo "Workspace directory not found! Check Checkout stage."; exit 1; fi'
