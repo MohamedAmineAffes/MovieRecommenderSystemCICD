@@ -45,8 +45,6 @@ This project is a Movie Recommender System implemented with a CI/CD pipeline usi
 4. Push to the branch (`git push origin feature-branch`).
 5. Open a pull request.
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 For questions, contact Mohamed Amine Affes at [your-email@example.com](mailto:your-email@example.com).
