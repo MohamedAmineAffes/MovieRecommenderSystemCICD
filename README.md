@@ -47,4 +47,4 @@ This project is a Movie Recommender System implemented with a CI/CD pipeline usi
 
 
 ## Contact
-For questions, contact Mohamed Amine Affes at [your-email@example.com](mailto:your-email@example.com).
+For questions, contact Mohamed Amine Affes at [mohamedamineaaffes@gmail.com](mailto:your-email@example.com).
