@@ -20,7 +20,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 # === Load movies metadata and preprocess genres ===
-md = pd.read_csv("movies_metadata.csv")
+md = pd.read_csv("models/movies_metadata.csv")
 md["genres"] = (
     md["genres"]
     .fillna("[]")
@@ -67,7 +67,7 @@ romance_chart = build_chart(gen_md, "Romance")
 print("Top Romance Movies:\n", romance_chart.head(10))
 
 # === Prepare small dataset based on links_small ===
-links_small = pd.read_csv("links_small.csv")
+links_small = pd.read_csv("models/links_small.csv")
 links_small = links_small[links_small["tmdbId"].notnull()]["tmdbId"].astype("int")
 
 # Drop bad rows from md
@@ -99,8 +99,8 @@ print("Recommendations based on description for 'The Godfather':")
 print(get_recommendations("The Godfather", titles, indices, cosine_sim).head(10))
 
 # === Load credits and keywords, merge with md ===
-credits = pd.read_csv("credits.csv")
-keywords = pd.read_csv("keywords.csv")
+credits = pd.read_csv("models/credits.csv")
+keywords = pd.read_csv("models/keywords.csv")
 
 keywords["id"] = keywords["id"].astype("int")
 credits["id"] = credits["id"].astype("int")
@@ -167,7 +167,7 @@ print(improved_recommendations("Mean Girls", smd, indices, cosine_sim, weighted_
 
 # === Prepare SVD collaborative filtering model ===
 reader = Reader()
-ratings = pd.read_csv("ratings_small.csv")
+ratings = pd.read_csv("models/ratings_small.csv")
 data = Dataset.load_from_df(ratings[["userId", "movieId", "rating"]], reader)
 
 svd = SVD()
@@ -178,7 +178,7 @@ trainset = data.build_full_trainset()
 svd.fit(trainset)
 
 # === Map movie IDs ===
-id_map = pd.read_csv("links_small.csv")[["movieId", "tmdbId"]]
+id_map = pd.read_csv("models/links_small.csv")[["movieId", "tmdbId"]]
 id_map["tmdbId"] = id_map["tmdbId"].apply(convert_int)
 id_map.columns = ["movieId", "id"]
 id_map = id_map.merge(smd[["title", "id"]], on="id").set_index("title")
