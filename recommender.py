@@ -6,17 +6,6 @@ from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 from nltk.stem.snowball import SnowballStemmer
 from surprise import Reader, Dataset, SVD
 
-# Global variables you might want to initialize later with real data:
-C = None
-m = None
-vote_counts = None
-vote_averages = None
-cosine_sim = None
-smd = None
-indices = None
-id_map = None
-indices_map = None
-svd = None
 
 def weighted_rating(x, m, C):
     v = x["vote_count"]
