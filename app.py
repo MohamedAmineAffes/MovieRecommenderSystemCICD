@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from recommender_core import load_data
-from recommender import get_recommendations, improved_recommendations, hybrid
+from recommender import get_recommendations, improved_recommendations, hybrid, load_data
 
 app = Flask(__name__)
 
