@@ -24,7 +24,7 @@ import warnings; warnings.simplefilter('ignore')
 # In[2]:
 
 
-md = pd. read_csv('movies_metadata.csv')
+md = pd. read_csv('models/movies_metadata.csv')
 md.head()
 
 
@@ -171,7 +171,7 @@ build_chart('Romance').head(15)
 # In[15]:
 
 
-links_small = pd.read_csv('links_small.csv')
+links_small = pd.read_csv('models/links_small.csv')
 links_small = links_small[links_small['tmdbId'].notnull()]['tmdbId'].astype('int')
 
 
@@ -290,8 +290,8 @@ get_recommendations('The Dark Knight').head(10)
 # In[28]:
 
 
-credits = pd.read_csv('credits.csv')
-keywords = pd.read_csv('keywords.csv')
+credits = pd.read_csv('models/credits.csv')
+keywords = pd.read_csv('models/keywords.csv')
 
 
 # In[29]:
@@ -553,7 +553,7 @@ reader = Reader()
 # In[56]:
 
 
-ratings = pd.read_csv('ratings_small.csv')
+ratings = pd.read_csv('models/ratings_small.csv')
 ratings.head()
 
 
@@ -623,7 +623,7 @@ def convert_int(x):
 # In[63]:
 
 
-id_map = pd.read_csv('links_small.csv')[['movieId', 'tmdbId']]
+id_map = pd.read_csv('models/links_small.csv')[['movieId', 'tmdbId']]
 id_map['tmdbId'] = id_map['tmdbId'].apply(convert_int)
 id_map.columns = ['movieId', 'id']
 id_map = id_map.merge(smd[['title', 'id']], on='id').set_index('title')

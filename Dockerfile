@@ -5,10 +5,10 @@ WORKDIR /app
 
 # Copy only necessary files
 COPY requirements.txt .
-COPY cleaned_file.py .
-COPY script_stage.py .
 COPY recommender.py .
-COPY *.csv .
+COPY app.py .           
+COPY templates/ templates/
+COPY models/ models/
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -21,5 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Download NLTK corpora
 RUN python -m nltk.downloader stopwords wordnet
 
+# Expose Flask port
+EXPOSE 5000
+
 # Run the application
-CMD ["python", "cleaned_file.py"]
+CMD ["python", "app.py"]
