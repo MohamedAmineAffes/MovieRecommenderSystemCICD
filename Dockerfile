@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 COPY recommender.py .
 COPY app.py .           
-#COPY *.csv .
+COPY templates/ templates/
 COPY models/ models/
 
 # Install system dependencies
