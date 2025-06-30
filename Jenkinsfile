@@ -69,26 +69,33 @@ pipeline {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     script {
 
-                        echo 'Saving Docker image...'
+                        echo 'Saving and compressing Docker image...'
                         sh 'docker save -o movie-recommender.tar movie-recommender:latest'
+                        sh 'gzip movie-recommender.tar' // Compress the tar file
 
                         echo 'Ensuring remote directory exists...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'mkdir -p ~/movie_recommender'"
 
-                        echo 'Copying Docker image to EC2...'
-                        sh "scp -o StrictHostKeyChecking=no movie-recommender.tar ubuntu@${EC2_HOST}:~/movie_recommender/"
+                        echo 'Copying compressed Docker image to EC2...'
+                        sh "scp -o StrictHostKeyChecking=no movie-recommender.tar.gz ubuntu@${EC2_HOST}:~/movie_recommender/"
 
-                        echo 'Loading and running Docker container on EC2...'
+                        echo 'Decompressing Docker image on EC2...'
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'gunzip ~/movie_recommender/movie-recommender.tar.gz'"
+
+                        echo 'Loading Docker image on EC2...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker load -i ~/movie_recommender/movie-recommender.tar'"
 
+                        echo 'Stopping and removing existing container (if exists)...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker rm -f movie-recommender-container || true'"
 
+                        echo 'Running Docker container on EC2...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest'"
 
+                        echo 'Cleaning up remote tar file...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'rm ~/movie_recommender/movie-recommender.tar'"
 
-                        echo 'Cleaning up local tar file...'
-                        sh 'rm movie-recommender.tar'
+                        echo 'Cleaning up local compressed file...'
+                        sh 'rm movie-recommender.tar.gz'
                     }
                 }
             }
@@ -101,6 +108,7 @@ pipeline {
                 }
             }
         }
+
 
 
         stage('Run Tests Inside Container') {
