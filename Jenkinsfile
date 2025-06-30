@@ -122,7 +122,7 @@ pipeline {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     sh """
-                        ssh ubuntu@${EC2_HOST} "docker exec movie-recommender-container pytest script_stage.py -v"
+                        ssh ubuntu@${EC2_HOST} "docker exec movie-recommender-container pytest /app/script_stage.py -v"
                     """
                 }
             }
