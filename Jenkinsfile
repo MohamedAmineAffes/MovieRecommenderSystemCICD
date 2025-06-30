@@ -15,6 +15,30 @@ pipeline {
             }
         }
 
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    echo 'Building images with Docker Compose...'
+                    sh 'docker-compose build'
+                }
+            }
+        }
+
+        stage('Run Application') {
+            steps {
+                script {
+                    echo 'Launching app with Docker Compose...'
+
+                    // Stop existing services if running
+                    sh 'docker-compose down || true'
+
+                    // Start services
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+
+
         stage('Test SSH Connection') {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
@@ -36,15 +60,6 @@ pipeline {
                     sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} "mkdir -p ~/movie_recommender"
                     """
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    echo 'Building Docker image...'
-                    dockerImage = docker.build("movie-recommender:latest")
                 }
             }
         }
