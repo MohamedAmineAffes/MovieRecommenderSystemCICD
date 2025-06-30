@@ -68,29 +68,24 @@ pipeline {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     script {
+
                         echo 'Saving Docker image...'
                         sh 'docker save -o movie-recommender.tar movie-recommender:latest'
 
                         echo 'Ensuring remote directory exists...'
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'mkdir -p ~/movie_recommender'
-                        """
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'mkdir -p ~/movie_recommender'"
 
                         echo 'Copying Docker image to EC2...'
-                        sh """
-                            scp -o StrictHostKeyChecking=no movie-recommender.tar ubuntu@${EC2_HOST}:~/movie_recommender/
-                        """
+                        sh "scp -o StrictHostKeyChecking=no movie-recommender.tar ubuntu@${EC2_HOST}:~/movie_recommender/"
 
-                        echo 'Loading and running Docker image on EC2...'
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} '
-                                cd ~/movie_recommender &&
-                                docker load -i movie-recommender.tar &&
-                                docker rm -f movie-recommender-container || true &&
-                                docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest &&
-                                rm movie-recommender.tar
-                            '
-                        """
+                        echo 'Loading and running Docker container on EC2...'
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker load -i ~/movie_recommender/movie-recommender.tar'"
+
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker rm -f movie-recommender-container || true'"
+
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest'"
+
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'rm ~/movie_recommender/movie-recommender.tar'"
 
                         echo 'Cleaning up local tar file...'
                         sh 'rm movie-recommender.tar'
@@ -106,6 +101,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Run Tests Inside Container') {
             steps {
