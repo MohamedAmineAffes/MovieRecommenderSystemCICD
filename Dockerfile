@@ -9,6 +9,8 @@ COPY recommender.py .
 COPY app.py .           
 COPY templates/ templates/
 COPY models/ models/
+COPY tests/ tests/
+
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
