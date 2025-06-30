@@ -118,19 +118,22 @@ pipeline {
 
 
 
-        stage('Run Tests Inside Container') {
+        stage('Check test file existence') {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
-                    // Step 1: Check file existence
-                    sh "ssh ubuntu@${EC2_HOST} 'docker exec movie-recommender-container test -f /app/tests/script_stage.py'"
-
-                    // Step 2: Run tests (only if previous check passed)
-                    sh "ssh ubuntu@${EC2_HOST} 'docker exec movie-recommender-container pytest /app/tests/script_stage.py -v'"
+                    sh """
+                        ssh ubuntu@${EC2_HOST} docker exec movie-recommender-container test -f /app/tests/script_stage.py
+                    """
                 }
             }
-            post {
-                failure {
-                    echo 'Tests failed inside Docker container on EC2!'
+        }
+
+        stage('Run tests') {
+            steps {
+                sshagent(credentials: ['ec2-ssh-key']) {
+                    sh """
+                        ssh ubuntu@${EC2_HOST} docker exec movie-recommender-container pytest /app/tests/script_stage.py -v
+                    """
                 }
             }
         }
