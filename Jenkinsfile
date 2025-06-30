@@ -120,10 +120,12 @@ pipeline {
 
         stage('Run Tests Inside Container') {
             steps {
-                sshagent (credentials: ['ec2-ssh-key']) {
-                    sh """
-                        ssh ubuntu@${EC2_HOST} "docker exec movie-recommender-container pytest /app/tests/script_stage.py -v"
-                    """
+                sshagent(credentials: ['ec2-ssh-key']) {
+                    // Step 1: Check file existence
+                    sh "ssh ubuntu@${EC2_HOST} 'docker exec movie-recommender-container test -f /app/tests/script_stage.py'"
+
+                    // Step 2: Run tests (only if previous check passed)
+                    sh "ssh ubuntu@${EC2_HOST} 'docker exec movie-recommender-container pytest /app/tests/script_stage.py -v'"
                 }
             }
             post {
