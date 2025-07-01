@@ -95,7 +95,7 @@ pipeline {
                         echo 'Stopping and removing existing container (if exists)...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker rm -f movie-recommender-container || true'"
 
-                        echo 'Running Docker container on EC2...'
+                        echo 'Running Docker container on EC2... '
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker run -d --name movie-recommender-container -p 5000:5000 movie-recommender:latest'"
 
                         echo 'Cleaning up remote tar files...'
