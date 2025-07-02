@@ -68,9 +68,27 @@ pipeline {
             steps {
                 sshagent (credentials: ['ec2-ssh-key']) {
                     script {
+                        echo 'Verifying if movie-recommender:latest Docker image exists...'
+                        sh '''
+                            set -e
+                            IMAGE_CHECK=$(docker images -q movie-recommender:latest)
+
+                            if [ -z "$IMAGE_CHECK" ]; then
+                                echo "❌ ERROR: Docker image 'movie-recommender:latest' not found!"
+                                echo "💡 Make sure to build the image before this deploy step."
+                                exit 1
+                            else
+                                echo "✅ Docker image found: $IMAGE_CHECK"
+                            fi
+                        '''
+
                         echo 'Saving and compressing Docker image locally...'
                         // Save and compress in one step for better speed and less disk usage
                         sh 'docker save movie-recommender:latest | gzip > movie-recommender.tar.gz'
+
+                        // ADD CHECK AFTER SAVE
+                        echo 'Checking compressed file size...'
+                        sh 'ls -lh movie-recommender.tar.gz'
 
                         echo 'Ensuring remote directory exists and cleaning old files...'
                         sh """
