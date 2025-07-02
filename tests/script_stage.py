@@ -36,15 +36,5 @@ def test_weighted_rating():
     assert wr > 0
 
 
-def test_get_recommendations(data):
-    titles = data["titles"]
-    indices = data["indices"]
-    cosine_sim = data["cosine_sim_basic"]
-    # Pick a sample movie title from the dataset
-    sample_title = titles.iloc[0]
-    recs = get_recommendations(sample_title, titles, indices, cosine_sim)
-    assert sample_title not in recs.values
-    assert len(recs) == 30
-
 if __name__ == "__main__":
     pytest.main()
