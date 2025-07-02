@@ -152,7 +152,7 @@ pipeline {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
                     sh """
-                        ssh ubuntu@${EC2_HOST} docker exec movie-recommender-container pytest /app/tests/script_stage.py -v
+                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker exec movie-recommender-container bash -c "PYTHONPATH=/app pytest /app/tests/script_stage.py -v"'
                     """
                 }
             }
