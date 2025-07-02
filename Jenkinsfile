@@ -114,7 +114,7 @@ pipeline {
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker rm -f movie-recommender-container || true'"
 
                         echo 'Running Docker container on EC2... '
-                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker run -d --memory="512m" --name movie-recommender-container -p 5000:5000 movie-recommender:latest'"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker run -d --memory=\\\"512m\\\" --name movie-recommender-container -p 5000:5000 movie-recommender:latest'"
 
                         echo 'Cleaning up remote tar files...'
                         sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'rm -f ~/movie_recommender/movie-recommender.tar ~/movie_recommender/movie-recommender.tar.gz'"
