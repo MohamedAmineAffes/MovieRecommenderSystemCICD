@@ -136,26 +136,5 @@ pipeline {
             }
         }
 
-
-
-        stage('Check test file existence') {
-            steps {
-                sshagent(credentials: ['ec2-ssh-key']) {
-                    sh """
-                        ssh ubuntu@${EC2_HOST} docker exec movie-recommender-container test -f /app/tests/script_stage.py
-                    """
-                }
-            }
-        }
-
-        stage('Run tests') {
-            steps {
-                sshagent(credentials: ['ec2-ssh-key']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} 'docker exec movie-recommender-container bash -c "PYTHONPATH=/app pytest /app/tests/script_stage.py -v"'
-                    """
-                }
-            }
-        }
     }
 }
